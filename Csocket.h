@@ -380,7 +380,6 @@ inline void TFD_CLR( cs_sock_t iSock, fd_set *set )
 }
 
 void __Perror( const CS_STRING & s, const char * pszFile, uint32_t iLineNo );
-uint64_t millitime();
 
 
 /**

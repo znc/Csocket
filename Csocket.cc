@@ -87,6 +87,7 @@
 
 #include <list>
 #include <algorithm>
+#include <chrono>
 
 #define CS_SRANDBUFFER 128
 
@@ -712,47 +713,19 @@ void __Perror( const CS_STRING & s, const char * pszFile, u_int iLineNo )
 	std::cerr << s << "(" << pszFile << ":" << iLineNo << "): " << CS_StrError( GetSockError(), szBuff, 0xff ) << endl;
 }
 
-uint64_t millitime()
-{
-	uint64_t iTime = 0;
-#ifdef _WIN32
-	struct timeb tm;
-	ftime( &tm );
-	iTime = tm.time * 1000;
-	iTime += tm.millitm;
-#else
-	struct timeval tv;
-	gettimeofday( &tv, NULL );
-	iTime = ( uint64_t )tv.tv_sec * 1000;
-	iTime += ( ( uint64_t )tv.tv_usec / 1000 );
-#endif /* _WIN32 */
-	return( iTime );
+static uint64_t millitime() {
+	std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
 }
 
-#ifndef _MSC_VER
-#define CS_GETTIMEOFDAY gettimeofday
-#else
-#define CS_GETTIMEOFDAY win32_gettimeofday
-
-// timezone-agnostic implementation of gettimeofday
-static int
-win32_gettimeofday( struct timeval* now, void* )
-{
-	static const ULONGLONG epoch = 116444736000000000ULL; // Jan 1st 1970
-
-	ULARGE_INTEGER file_time;
-	SYSTEMTIME system_time;
-
-	GetSystemTime( &system_time );
-	if ( !SystemTimeToFileTime( &system_time, ( LPFILETIME )&file_time) )
-		return( 1 );
-
-	now->tv_sec = ( long )( ( file_time.QuadPart - epoch ) / 10000000L );
-	now->tv_usec = ( long )( system_time.wMilliseconds * 1000 );
-
+#define CS_GETTIMEOFDAY cxx11_gettimeofday
+static int cxx11_gettimeofday(struct timeval* now, void*) {
+	std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
+	long long micros = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count();
+	now->tv_sec = micros / 1000000LL;
+	now->tv_usec = micros % 1000000LL;
 	return 0;
 }
-#endif
 
 #ifndef _NO_CSOCKET_NS // some people may not want to use a namespace
 }
