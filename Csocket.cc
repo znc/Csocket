@@ -1320,14 +1320,16 @@ bool Csock::ConnectUnixInternal( const CS_STRING & sPath )
 	}
 	if( connect( m_iReadSock, ( struct sockaddr * )&addr, sizeof(addr) ) == -1)
 	{
-		CS_DEBUG( "Connect Failed. ERRNO [" << GetSockError() << "] FD [" << m_iReadSock << "]" );
+		int e = GetSockError();
+		CS_DEBUG( "Connect Failed. ERRNO [" << e << "] FD [" << m_iReadSock << "]" );
+		if( e == ECONNREFUSED )
+			ConnectionRefused();
+		else
+			CallSockError( e );
 		return( false );
 	}
 
-	if( m_eConState != CST_OK )
-	{
-		m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
-	}
+	m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
 
 	return( true );
 }
