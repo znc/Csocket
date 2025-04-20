@@ -673,7 +673,7 @@ public:
 	 * @brief Connect to a UNIX socket.
 	 * @param sPath the path to the UNIX socket.
 	 */
-	virtual bool ConnectUnix( const CS_STRING & sPath );
+	virtual bool ConnectUnixInternal( const CS_STRING & sPath );
 
 	/**
 	 * @brief Listens for connections on an UNIX socket
@@ -681,7 +681,7 @@ public:
 	 * @param iMaxConns the maximum amount of pending connections to allow
 	 * @param iTimeout if no connections come in by this timeout, the listener is closed
 	 */
-	virtual bool ListenUnix( const CS_STRING & sBindFile, int iMaxConns = SOMAXCONN, uint32_t iTimeout = 0 );
+	virtual bool ListenUnixInternal( const CS_STRING & sBindFile, int iMaxConns = SOMAXCONN, uint32_t iTimeout = 0 );
 #endif
 
 	/**
@@ -1257,6 +1257,9 @@ private:
 	bool m_cnvTryUTF8;
 	bool m_cnvSendUTF8;
 	CS_STRING m_sEncoding;
+#endif
+#ifdef HAVE_UNIX_SOCKET
+	bool m_bUnixListen;
 #endif
 };
 

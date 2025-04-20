@@ -1028,6 +1028,12 @@ Csock::~Csock()
 
 	CloseSocksFD();
 
+#ifdef HAVE_UNIX_SOCKET
+	if (m_bUnixListen) {
+		::unlink(m_sBindHost.c_str());
+	}
+#endif
+
 #ifdef _WIN32
 	::WSASetLastError( iOldError );
 #endif /* _WIN32 */
@@ -1143,6 +1149,9 @@ void Csock::Copy( const Csock & cCopy )
 	}
 
 #endif /* HAVE_LIBSSL */
+#ifdef HAVE_UNIX_SOCKET
+	m_bUnixListen = cCopy.m_bUnixListen;
+#endif
 
 #ifdef HAVE_ICU
 	SetEncoding(cCopy.m_sEncoding);
@@ -1279,6 +1288,9 @@ bool Csock::Connect()
 #ifdef HAVE_UNIX_SOCKET
 static bool prepare_sockaddr(struct sockaddr_un * addr, const CS_STRING & sPath)
 {
+    if (sPath.empty()) {
+        return false;
+	}
 	memset( addr, 0, sizeof(*addr) );
 	addr->sun_family = AF_UNIX;
 	auto length = sPath.length();
@@ -1290,7 +1302,7 @@ static bool prepare_sockaddr(struct sockaddr_un * addr, const CS_STRING & sPath)
 	return true;
 }
 
-bool Csock::ConnectUnix( const CS_STRING & sPath )
+bool Csock::ConnectUnixInternal( const CS_STRING & sPath )
 {
 	if( m_iReadSock != m_iWriteSock )
 		return( false );
@@ -1320,7 +1332,7 @@ bool Csock::ConnectUnix( const CS_STRING & sPath )
 	return( true );
 }
 
-bool Csock::ListenUnix( const CS_STRING & sBindFile, int iMaxConns, u_int iTimeout )
+bool Csock::ListenUnixInternal( const CS_STRING & sBindFile, int iMaxConns, u_int iTimeout )
 {
 	m_iConnType = LISTENER;
 	m_iTimeout = iTimeout;
@@ -1365,6 +1377,7 @@ bool Csock::ListenUnix( const CS_STRING & sBindFile, int iMaxConns, u_int iTimeo
 	// ListeningUnix() be added? We aren't doing anything asynchronous...
 	//Listening( m_sBindHost, m_uPort );
 
+	m_bUnixListen = true;
 	return( true );
 }
 #endif
@@ -3296,6 +3309,9 @@ void Csock::Init( const CS_STRING & sHostname, uint16_t uPort, int iTimeout )
 	m_cnvExt = NULL;
 	m_cnvInt = ucnv_open( "UTF-8", &e );
 #endif /* HAVE_ICU */
+#ifdef HAVE_UNIX_SOCKET
+	m_bUnixListen = false;
+#endif
 }
 
 ////////////////////////// CSocketManager //////////////////////////
