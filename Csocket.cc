@@ -1288,8 +1288,8 @@ bool Csock::Connect()
 #ifdef HAVE_UNIX_SOCKET
 static bool prepare_sockaddr(struct sockaddr_un * addr, const CS_STRING & sPath)
 {
-    if (sPath.empty()) {
-        return false;
+	if (sPath.empty()) {
+		return false;
 	}
 	memset( addr, 0, sizeof(*addr) );
 	addr->sun_family = AF_UNIX;
@@ -1309,7 +1309,12 @@ bool Csock::ConnectUnixInternal( const CS_STRING & sPath )
 	if( m_iReadSock == CS_INVALID_SOCK )
 		m_iReadSock = m_iWriteSock = CreateSocket( false, true );
 
+#ifndef __CYGWIN__
+	// Cygwin emulates unix sockets using IP sockets, so connect() actually
+	// needs to be blocking, otherwise it returns SockError(119 Operation now in
+	// progress). Therefore for cygwin do it after connect().
 	set_non_blocking( m_iReadSock );
+#endif
 	m_iConnType = OUTBOUND;
 
 	struct sockaddr_un addr;
@@ -1329,6 +1334,9 @@ bool Csock::ConnectUnixInternal( const CS_STRING & sPath )
 		return( false );
 	}
 
+#ifdef __CYGWIN__
+	set_non_blocking( m_iReadSock );
+#endif
 	m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
 
 	return( true );
