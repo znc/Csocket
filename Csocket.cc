@@ -1294,6 +1294,7 @@ static bool prepare_sockaddr(struct sockaddr_un * addr, const CS_STRING & sPath)
 	memset( addr, 0, sizeof(*addr) );
 	addr->sun_family = AF_UNIX;
 	auto length = sPath.length();
+	CS_DEBUG("prepare_sockaddr: " << length << " " << sizeof(addr->sun_path));
 	if( sizeof(addr->sun_path) <= length )
 		return( false );
 	memcpy( &addr->sun_path, sPath.c_str(), length + 1 );
