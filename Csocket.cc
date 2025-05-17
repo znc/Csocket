@@ -1236,7 +1236,7 @@ bool Csock::Connect()
 		// this was already called, so skipping now. this is to allow easy pass through
 		if( m_eConState != CST_OK )
 		{
-			m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
+			m_eConState = CST_CONNECTWAIT;
 		}
 		return( true );
 	}
@@ -1278,7 +1278,7 @@ bool Csock::Connect()
 
 	if( m_eConState != CST_OK )
 	{
-		m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
+		m_eConState = CST_CONNECTWAIT;
 	}
 
 	return( true );
@@ -2308,7 +2308,7 @@ cs_ssize_t Csock::Read( char *data, size_t len )
 		return( READ_EAGAIN ); // allow the handshake to complete first
 
 #ifdef HAVE_LIBSSL
-	if( m_bUseSSL )
+	if( m_bUseSSL && m_eConState != CST_CONNECTWAIT )
 	{
 		if( !m_ssl )
 		{
@@ -2404,7 +2404,12 @@ CS_STRING Csock::GetRemoteIP() const
 }
 
 bool Csock::IsConnected() const { return( m_bIsConnected ); }
-void Csock::SetIsConnected( bool b ) { m_bIsConnected = b; }
+void Csock::SetIsConnected(bool b) {
+    m_bIsConnected = b;
+    if (m_eConState == CST_CONNECTWAIT && b) {
+        m_eConState = (GetSSL() ? CST_CONNECTSSL : CST_OK);
+	}
+}
 
 cs_sock_t & Csock::GetRSock() { return( m_iReadSock ); }
 const cs_sock_t & Csock::GetRSock() const { return( m_iReadSock ); }
@@ -4008,7 +4013,7 @@ void CSocketManager::Select( std::map<Csock *, EMessages> & mpeSocks )
 
 		pcSock->AssignFDs( miiReadyFds, &tv );
 
-		if( pcSock->GetConState() != Csock::CST_OK )
+		if( pcSock->GetConState() != Csock::CST_OK && pcSock->GetConState()!=Csock::CST_CONNECTWAIT)
 			continue;
 
 		bHasAvailSocks = true;
@@ -4159,7 +4164,7 @@ void CSocketManager::Select( std::map<Csock *, EMessages> & mpeSocks )
 #endif /* HAVE_C_ARES */
 		pcSock->CheckFDs( miiReadyFds );
 
-		if( pcSock->GetConState() != Csock::CST_OK )
+		if( pcSock->GetConState() != Csock::CST_OK && pcSock->GetConState() != Csock::CST_CONNECTWAIT )
 			continue;
 
 		cs_sock_t & iRSock = pcSock->GetRSock();

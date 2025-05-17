@@ -641,6 +641,7 @@ public:
 	    CST_BINDVHOST	= 1,
 	    CST_DESTDNS		= 2,
 	    CST_CONNECT		= 3,
+		CST_CONNECTWAIT = 6,
 	    CST_CONNECTSSL	= 4,
 	    CST_OK			= 5
 	};
