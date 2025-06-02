@@ -1031,9 +1031,8 @@ Csock::~Csock()
 	CloseSocksFD();
 
 #ifdef HAVE_UNIX_SOCKET
-	if (m_bUnixListen) {
+	if( m_bUnixListen )
 		::unlink(m_sBindHost.c_str());
-	}
 #endif
 
 #ifdef _WIN32
@@ -1290,9 +1289,9 @@ bool Csock::Connect()
 #ifdef HAVE_UNIX_SOCKET
 static bool prepare_sockaddr(struct sockaddr_un * addr, const CS_STRING & sPath)
 {
-	if (sPath.empty()) {
-		return false;
-	}
+	if ( sPath.empty() )
+		return( false );
+
 	memset( addr, 0, sizeof(*addr) );
 	addr->sun_family = AF_UNIX;
 	auto length = sPath.length();
