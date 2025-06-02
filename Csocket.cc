@@ -713,15 +713,17 @@ void __Perror( const CS_STRING & s, const char * pszFile, u_int iLineNo )
 	std::cerr << s << "(" << pszFile << ":" << iLineNo << "): " << CS_StrError( GetSockError(), szBuff, 0xff ) << endl;
 }
 
-static uint64_t millitime() {
-	std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
-	return std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+static uint64_t millitime()
+{
+	std::chrono::time_point< std::chrono::steady_clock > time = std::chrono::steady_clock::now();
+	return std::chrono::duration_cast< std::chrono::milliseconds >( time.time_since_epoch() ).count();
 }
 
 #define CS_GETTIMEOFDAY cxx11_gettimeofday
-static int cxx11_gettimeofday(struct timeval* now, void*) {
-	std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
-	long long micros = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count();
+static int cxx11_gettimeofday( struct timeval * now, void * )
+{
+	std::chrono::time_point< std::chrono::steady_clock > time = std::chrono::steady_clock::now();
+	long long micros = std::chrono::duration_cast< std::chrono::microseconds >( time.time_since_epoch() ).count();
 	now->tv_sec = micros / 1000000LL;
 	now->tv_usec = micros % 1000000LL;
 	return 0;
