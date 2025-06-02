@@ -713,15 +713,17 @@ void __Perror( const CS_STRING & s, const char * pszFile, u_int iLineNo )
 	std::cerr << s << "(" << pszFile << ":" << iLineNo << "): " << CS_StrError( GetSockError(), szBuff, 0xff ) << endl;
 }
 
-static uint64_t millitime() {
-	std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
-	return std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+static uint64_t millitime()
+{
+	std::chrono::time_point< std::chrono::steady_clock > time = std::chrono::steady_clock::now();
+	return std::chrono::duration_cast< std::chrono::milliseconds >( time.time_since_epoch() ).count();
 }
 
 #define CS_GETTIMEOFDAY cxx11_gettimeofday
-static int cxx11_gettimeofday(struct timeval* now, void*) {
-	std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::steady_clock::now();
-	long long micros = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count();
+static int cxx11_gettimeofday( struct timeval * now, void * )
+{
+	std::chrono::time_point< std::chrono::steady_clock > time = std::chrono::steady_clock::now();
+	long long micros = std::chrono::duration_cast< std::chrono::microseconds >( time.time_since_epoch() ).count();
 	now->tv_sec = micros / 1000000LL;
 	now->tv_usec = micros % 1000000LL;
 	return 0;
@@ -1029,9 +1031,8 @@ Csock::~Csock()
 	CloseSocksFD();
 
 #ifdef HAVE_UNIX_SOCKET
-	if (m_bUnixListen) {
+	if( m_bUnixListen )
 		::unlink(m_sBindHost.c_str());
-	}
 #endif
 
 #ifdef _WIN32
@@ -1288,9 +1289,9 @@ bool Csock::Connect()
 #ifdef HAVE_UNIX_SOCKET
 static bool prepare_sockaddr(struct sockaddr_un * addr, const CS_STRING & sPath)
 {
-	if (sPath.empty()) {
-		return false;
-	}
+	if ( sPath.empty() )
+		return( false );
+
 	memset( addr, 0, sizeof(*addr) );
 	addr->sun_family = AF_UNIX;
 	auto length = sPath.length();
@@ -1357,7 +1358,7 @@ bool Csock::ListenUnixInternal( const CS_STRING & sBindFile, int iMaxConns, u_in
 	if( !prepare_sockaddr( &addr, sBindFile) )
 	{
 		CallSockError( EADDRNOTAVAIL );
-		CS_DEBUG("Csock::ListenUnixInternal(): prepare_sockaddr failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): prepare_sockaddr failed" );
 		return( false );
 	}
 
@@ -1366,21 +1367,21 @@ bool Csock::ListenUnixInternal( const CS_STRING & sBindFile, int iMaxConns, u_in
 	if( m_iReadSock == CS_INVALID_SOCK )
 	{
 		CallSockError( EBADF );
-		CS_DEBUG("Csock::ListenUnixInternal(): CreateSocket failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): CreateSocket failed" );
 		return( false );
 	}
 
 	if( bind( m_iReadSock, ( struct sockaddr * ) &addr, sizeof(addr) ) == -1 )
 	{
 		CallSockError( GetSockError() );
-		CS_DEBUG("Csock::ListenUnixInternal(): bind failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): bind failed" );
 		return( false );
 	}
 
 	if( listen( m_iReadSock, iMaxConns ) == -1 )
 	{
 		CallSockError( GetSockError() );
-		CS_DEBUG("Csock::ListenUnixInternal(): listen failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): listen failed" );
 		return( false );
 	}
 
@@ -2404,11 +2405,11 @@ CS_STRING Csock::GetRemoteIP() const
 }
 
 bool Csock::IsConnected() const { return( m_bIsConnected ); }
-void Csock::SetIsConnected(bool b) {
-    m_bIsConnected = b;
-    if (m_eConState == CST_CONNECTWAIT && b) {
-        m_eConState = (GetSSL() ? CST_CONNECTSSL : CST_OK);
-	}
+void Csock::SetIsConnected( bool b )
+{
+	m_bIsConnected = b;
+	if( m_eConState == CST_CONNECTWAIT && b )
+		m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
 }
 
 cs_sock_t & Csock::GetRSock() { return( m_iReadSock ); }
@@ -4013,7 +4014,7 @@ void CSocketManager::Select( std::map<Csock *, EMessages> & mpeSocks )
 
 		pcSock->AssignFDs( miiReadyFds, &tv );
 
-		if( pcSock->GetConState() != Csock::CST_OK && pcSock->GetConState()!=Csock::CST_CONNECTWAIT)
+		if( pcSock->GetConState() != Csock::CST_OK && pcSock->GetConState() != Csock::CST_CONNECTWAIT )
 			continue;
 
 		bHasAvailSocks = true;
