@@ -1358,7 +1358,7 @@ bool Csock::ListenUnixInternal( const CS_STRING & sBindFile, int iMaxConns, u_in
 	if( !prepare_sockaddr( &addr, sBindFile) )
 	{
 		CallSockError( EADDRNOTAVAIL );
-		CS_DEBUG("Csock::ListenUnixInternal(): prepare_sockaddr failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): prepare_sockaddr failed" );
 		return( false );
 	}
 
@@ -1367,21 +1367,21 @@ bool Csock::ListenUnixInternal( const CS_STRING & sBindFile, int iMaxConns, u_in
 	if( m_iReadSock == CS_INVALID_SOCK )
 	{
 		CallSockError( EBADF );
-		CS_DEBUG("Csock::ListenUnixInternal(): CreateSocket failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): CreateSocket failed" );
 		return( false );
 	}
 
 	if( bind( m_iReadSock, ( struct sockaddr * ) &addr, sizeof(addr) ) == -1 )
 	{
 		CallSockError( GetSockError() );
-		CS_DEBUG("Csock::ListenUnixInternal(): bind failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): bind failed" );
 		return( false );
 	}
 
 	if( listen( m_iReadSock, iMaxConns ) == -1 )
 	{
 		CallSockError( GetSockError() );
-		CS_DEBUG("Csock::ListenUnixInternal(): listen failed");
+		CS_DEBUG( "Csock::ListenUnixInternal(): listen failed" );
 		return( false );
 	}
 
