@@ -2405,11 +2405,11 @@ CS_STRING Csock::GetRemoteIP() const
 }
 
 bool Csock::IsConnected() const { return( m_bIsConnected ); }
-void Csock::SetIsConnected(bool b) {
-    m_bIsConnected = b;
-    if (m_eConState == CST_CONNECTWAIT && b) {
-        m_eConState = (GetSSL() ? CST_CONNECTSSL : CST_OK);
-	}
+void Csock::SetIsConnected( bool b )
+{
+	m_bIsConnected = b;
+	if( m_eConState == CST_CONNECTWAIT && b )
+		m_eConState = ( GetSSL() ? CST_CONNECTSSL : CST_OK );
 }
 
 cs_sock_t & Csock::GetRSock() { return( m_iReadSock ); }
@@ -4014,7 +4014,7 @@ void CSocketManager::Select( std::map<Csock *, EMessages> & mpeSocks )
 
 		pcSock->AssignFDs( miiReadyFds, &tv );
 
-		if( pcSock->GetConState() != Csock::CST_OK && pcSock->GetConState()!=Csock::CST_CONNECTWAIT)
+		if( pcSock->GetConState() != Csock::CST_OK && pcSock->GetConState() != Csock::CST_CONNECTWAIT )
 			continue;
 
 		bHasAvailSocks = true;
